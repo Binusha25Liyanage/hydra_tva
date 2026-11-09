@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hydra TvA</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="mark">H</span><span>HYDRA</span><span class="sep">·</span><span class="sub">Target vs Achievement</span><span class="tag">INTERIM</span></div>
+  <div class="top-right"><span id="version"></span></div>
+</header>
+
+<nav class="sidebar">
+  <a data-view="daily" class="active"><span class="ico">◧</span>Daily Reports</a>
+  <a data-view="monthend"><span class="ico">▤</span>Month End</a>
+  <a data-view="calendar"><span class="ico">▦</span>Calendar</a>
+  <a data-view="sfa"><span class="ico">⇩</span>SFA Connection</a>
+  <a data-view="targets"><span class="ico">◎</span>Targets</a>
+  <a data-view="settings"><span class="ico">⚙</span>Settings</a>
+  <a data-view="history"><span class="ico">↺</span>History</a>
+  <div class="side-foot" id="sideFoot"></div>
+</nav>
+
+<main>
+  <!-- ============================== DAILY -->
+  <section id="view-daily" class="view active">
+    <div class="view-head">
+      <h1>Daily Reports</h1>
+      <div class="inline"><label>Report date</label><input type="date" id="dDate"></div>
+    </div>
+    <div class="chips" id="dChips"></div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2><span class="step">1</span>Get the day's SFA files</h2>
+        <div class="row">
+          <button class="btn primary" id="dSfa">⇩ Download from SFA</button>
+          <label class="check"><input type="checkbox" id="dSfaGen" checked> then generate the reports</label>
+        </div>
+        <p class="muted small">Downloads Outlet Wise SKU Sales, Callage Summary and Pending Orders for the report date with your SFA login, then loads them. Or add files you downloaded yourself (the type and date are read from each file; a sales export covering several days is split into days):</p>
+        <div class="row">
+          <button class="btn" id="dAdd">Add files…</button>
+          <label class="check"><input type="checkbox" id="dReplace"> Replace days already loaded</label>
+        </div>
+        <div id="dPreview"></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="step">2</span>Generate the report pack</h2>
+        <div id="dWhich" class="checks"></div>
+        <label class="check small"><input type="checkbox" id="dForce"> Make Daily Winners even if it is not a competition day</label>
+        <div class="row">
+          <button class="btn primary" id="dGen">Generate reports</button>
+          <button class="btn ghost" id="dOpenOut">Open output folder</button>
+        </div>
+        <div id="dResults"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Data loaded this month</h2>
+      <div id="dMonth" class="monthstrip"></div>
+      <div class="legend"><span class="dot s"></span>Sales <span class="dot c"></span>Callage <span class="dot p"></span>Pending <span class="sw comp1"></span>Round 1 <span class="sw comp2"></span>Round 2 <span class="sw off"></span>Non-working</div>
+    </div>
+  </section>
+
+  <!-- ============================== MONTH END -->
+  <section id="view-monthend" class="view">
+    <div class="view-head"><h1>Month End — Finalized Target vs Achievement</h1></div>
+    <div class="grid2">
+      <div class="card">
+        <h2><span class="step">1</span>Rep Performance Report</h2>
+        <p class="muted">Download the SFA Rep Performance Report for the month and load it here. Its <b>PRODUTIVE CALLS</b> column is the Total PC Count.</p>
+        <div class="row"><label>Month</label><input type="month" id="mMonth"></div>
+        <div id="mRepStatus" class="muted"></div>
+        <div class="row"><button class="btn primary" id="mSfa">⇩ Download from SFA</button><button class="btn" id="mAdd">Load Rep Performance Report…</button>
+          <label class="check"><input type="checkbox" id="mReplace" checked> Replace if already loaded</label></div>
+        <div id="mPreview"></div>
+      </div>
+      <div class="card">
+        <h2><span class="step">2</span>Generate the Finalized file</h2>
+        <div class="row"><label>From</label><input type="date" id="mFrom"><label>To</label><input type="date" id="mTo"></div>
+        <p class="muted small">Columns: GT target and achievement, Total PC, AVG PC (Total PC ÷ days with at least one productive call), previous month and the difference. Extra sheets: Days Worked and Reconciliation (daily sales vs SFA ACHIEVED SALES).</p>
+        <div class="row"><button class="btn primary" id="mGen">Generate Finalized file</button></div>
+        <div id="mResults"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== CALENDAR -->
+  <section id="view-calendar" class="view">
+    <div class="view-head">
+      <h1>Competition Calendar</h1>
+      <div class="inline"><label>Month</label><input type="month" id="cMonth"></div>
+    </div>
+    <div class="card">
+      <p class="muted">Click a day to cycle: <b>Working</b> → <b>Competition Round 1</b> → <b>Round 2</b> → <b>Holiday</b>. Working days set NOWD and the day targets; competition days decide when Daily Winners is made.</p>
+      <div id="cGrid" class="calgrid"></div>
+      <div class="row between">
+        <div id="cSummary" class="summary"></div>
+        <div class="row"><button class="btn ghost" id="cReset">Reset to Mon–Sat</button><button class="btn primary" id="cSave">Save calendar</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== TARGETS -->
+  <section id="view-targets" class="view">
+    <div class="view-head">
+      <h1>Targets</h1>
+      <div class="inline"><label>Month</label><input type="month" id="tMonth"></div>
+    </div>
+    <div class="card">
+      <div class="row between">
+        <div id="tStatus" class="summary"></div>
+        <div class="row">
+          <button class="btn" id="tLoad">Load target file…</button>
+          <button class="btn ghost" id="tCopy">Copy previous month</button>
+          <button class="btn ghost" id="tTemplate">Edit in Excel (template)</button>
+        </div>
+      </div>
+      <p class="muted small">Accepted files: a Famulus <i>Target vs Achievement</i> report (the hierarchy is rebuilt from its subtotal rows) or this app's Targets template. Edit territory targets below; parent totals add up automatically.</p>
+      <div id="tPreview"></div>
+      <div class="tablewrap"><table class="tree" id="tTable"></table></div>
+    </div>
+  </section>
+
+  <!-- ============================== SETTINGS -->
+  <section id="view-settings" class="view">
+    <div class="view-head"><h1>Settings</h1></div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Output</h2>
+        <div class="row"><label>Folder</label><span id="sOut" class="path"></span></div>
+        <div class="row"><button class="btn ghost" id="sOutChange">Change…</button><button class="btn ghost" id="sOutOpen">Open</button></div>
+        <div class="row"><label>Title prefix</label><input type="text" id="sPrefix" placeholder="(none) e.g. Lakmee"></div>
+        <p class="muted small">Report titles are "&lt;prefix&gt; — Day Report — …" when a prefix is set, otherwise "Day Report — …".</p>
+        <h2>Finalized file</h2>
+        <label class="check"><input type="checkbox" id="sNat"> Include NATIONAL TOTAL row</label>
+        <label class="check"><input type="checkbox" id="sSmmtPc"> Add SMMT territories' PC to subtotals</label>
+        <div class="row"><label>Reconciliation tolerance</label><input type="number" id="sTol" style="width:110px"></div>
+        <div class="row"><button class="btn primary" id="sSave">Save</button></div>
+      </div>
+      <div class="card">
+        <h2>Competition limits</h2>
+        <table class="mini">
+          <tr><th></th><th>Sale limit</th><th>Bill limit</th></tr>
+          <tr><td>Van Selling</td><td><input type="number" id="lVanS"></td><td><input type="number" id="lVanB"></td></tr>
+          <tr><td>Pre Selling</td><td><input type="number" id="lPreS"></td><td><input type="number" id="lPreB"></td></tr>
+        </table>
+        <div class="row"><button class="btn primary" id="lSave">Save limits</button></div>
+        <h2>Famulus data</h2>
+        <p class="muted small">Import history (daily sales, callage, pending orders, targets) and settings from a Famulus <code>target_report.db</code>. Days already loaded are kept.</p>
+        <div class="row"><button class="btn" id="sFamulus">Import Famulus database…</button></div>
+        <div id="sFamRes" class="muted small"></div>
+        <p class="muted small">Database: <span id="sDb" class="path"></span></p>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Selling mode by territory</h2>
+        <div class="tablewrap short"><table class="mini" id="sModes"></table></div>
+      </div>
+      <div class="card">
+        <h2>Outlet categories in the competition</h2>
+        <p class="muted small">Unticked categories (SMMT / MRP) still count toward achievement but not toward Daily Winners.</p>
+        <div class="tablewrap short"><table class="mini" id="sCats"></table></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>Territory name aliases</h2>
+        <p class="muted small">Use this when an SFA file spells a territory differently from the target file. Case, spaces and punctuation are already ignored.</p>
+        <div class="row"><input type="text" id="aAlias" placeholder="Name in SFA file"><span>→</span><select id="aTerr"></select><button class="btn" id="aAdd">Add</button></div>
+        <table class="mini" id="sAliases"></table>
+      </div>
+      <div class="card">
+        <h2>Report label overrides</h2>
+        <p class="muted small">Print a different name for a hierarchy row, e.g. "ASM Vacant - Uva &amp; Sab" → "ASM Vidura - Uva &amp; Sab".</p>
+        <div class="row"><input type="text" id="oOrig" placeholder="Label in targets"><span>→</span><input type="text" id="oDisp" placeholder="Label in reports"><button class="btn" id="oAdd">Add</button></div>
+        <table class="mini" id="sOverrides"></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== SFA CONNECTION -->
+  <section id="view-sfa" class="view">
+    <div class="view-head"><h1>SFA Connection</h1>
+      <div class="row"><button class="btn ghost" id="sfaOpenMonitor">Live run</button><button class="btn ghost" id="sfaOpenDl">Open downloads folder</button></div></div>
+    <div id="sfaLoginWarn"></div>
+    <div class="grid2">
+      <div class="card">
+        <h2>SFA login</h2>
+        <p class="muted small">Your own SalesPro login. Saved on this PC only; the password is encrypted with your Windows account.</p>
+        <div class="formgrid">
+          <label>Login URL</label><input type="text" id="sfaUrl" class="mono" placeholder="https://lakmee.salespro.lk/">
+          <label>Username</label><input type="text" id="sfaUser" autocomplete="off">
+          <label>Password</label><input type="password" id="sfaPass" autocomplete="new-password">
+          <label>Browser</label><select id="sfaBrowser"><option value="edge">Microsoft Edge</option><option value="chrome">Google Chrome</option><option value="firefox">Firefox</option></select>
+        </div>
+        <div class="row"><button class="btn primary" id="sfaSave">Save</button><button class="btn" id="sfaTest">Test connection</button>
+          <label class="check small"><input type="checkbox" id="sfaTestShow"> show the browser</label></div>
+        <div id="sfaTestRes"></div>
+      </div>
+      <div class="card">
+        <h2>Download settings</h2>
+        <div class="formgrid">
+          <label>Tabs at once</label><input type="number" id="sfaPar" min="1" max="6">
+          <label>Retries per report</label><input type="number" id="sfaRet" min="0" max="3">
+          <label>Page timeout (s)</label><input type="number" id="sfaTmo" min="15" max="300">
+        </div>
+        <label class="check"><input type="checkbox" id="sfaShow"> Show the browser while downloading</label>
+        <div class="row"><button class="btn primary" id="sfaSave2">Save</button></div>
+        <p class="muted small">Hydra logs in once, then opens one tab per report: it sets the filters by their labels, clicks Search, then Export (or the green Excel icon), checks the file matches the filters and loads it.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row between"><h2 style="margin:0">Report profiles</h2><span class="muted small">Defaults: <span id="sfaDefSrc" class="path"></span></span></div>
+      <table class="mini wide" style="margin-top:8px">
+        <thead><tr><th style="width:56px">On</th><th>Report</th><th>Navigation URL</th><th>Filters</th><th style="width:250px"></th></tr></thead>
+        <tbody id="sfaRows"></tbody></table>
+    </div>
+    <div class="card" id="sfaAdmin" style="display:none">
+      <h2>Admin — defaults for the exe</h2>
+      <p class="muted small">Saves the login URL and all report profiles (never usernames or passwords) as <code>sfa_defaults.json</code>, bundled when you run <code>build_exe.bat</code> (or put it next to <i>Hydra TvA.exe</i>). Users get these profiles; if they edit one, <b>Reset</b> brings your default back. Profiles they never edited follow your newer defaults.</p>
+      <div class="row"><button class="btn primary" id="sfaExport">Save current profiles as defaults</button><span id="sfaExportRes" class="muted small"></span></div>
+    </div>
+  </section>
+
+  <!-- ============================== HISTORY -->
+  <section id="view-history" class="view">
+    <div class="view-head"><h1>History</h1></div>
+    <div class="card"><div class="tablewrap"><table class="mini wide" id="hTable"></table></div></div>
+  </section>
+</main>
+
+<div id="modal-backdrop" class="modal-backdrop" style="display:none">
+  <div class="modal" id="modal">
+    <div class="modal-header"><h3 id="modal-title"></h3><button class="modal-x" id="modal-x">&times;</button></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="busy"><div><div class="spinner"></div><div id="busyText">Working…</div></div></div>
+<script src="app.js"></script>
+</body>
+</html>
